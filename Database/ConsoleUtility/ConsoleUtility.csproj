@@ -4,16 +4,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{46E8FFCE-04E7-4D80-B1C8-682FBEEDCF5F}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>Database</RootNamespace>
-    <AssemblyName>Database</AssemblyName>
+    <ProjectGuid>{3D01EF66-C944-4B7F-9379-2D1C372BD1CB}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ConsoleUtility</RootNamespace>
+    <AssemblyName>ConsoleUtility</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -23,7 +22,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -42,29 +40,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataObject.cs" />
-    <Compile Include="DataService.cs" />
-    <Compile Include="DBManager.cs" />
-    <Compile Include="DBServer.cs" />
-    <Compile Include="NamedVariable.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="MyConsole.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StatObject.cs" />
-    <Compile Include="Table.cs" />
-    <Compile Include="UserObject.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ConsoleUtility\ConsoleUtility.csproj">
-      <Project>{3d01ef66-c944-4b7f-9379-2d1c372bd1cb}</Project>
-      <Name>ConsoleUtility</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\DBNetworking\DBNetworking.csproj">
-      <Project>{fa656125-caf6-47b3-a244-49817edbc00d}</Project>
-      <Name>DBNetworking</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
