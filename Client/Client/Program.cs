@@ -8,8 +8,17 @@ namespace Client
 {
     class Program
     {
+        static void Initialize()
+        {
+            DBClient.Initialize();
+        }
+
         static void Main(string[] args)
         {
+            Initialize();
+            DBClient.Connect();
+
+
         }
     }
 }
