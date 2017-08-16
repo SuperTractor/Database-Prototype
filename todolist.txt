@@ -1,6 +1,6 @@
 * DONE 实现 DB Server 接收客户端连接
 * DONE 实现客户端连接 DB Server
-* 建立连接后，DB server 分配线程给客户端；所有的线程都执行同一个函数 data service
-* 实现客户端连接 DB server
+* DONE 建立连接后，DB server 分配线程给客户端；所有的线程都执行同一个函数 data service
+* DONE 实现客户端连接 DB server
 * 客户端可任意请求 增查删改
 * 多个客户端可以同时请求 增查删改

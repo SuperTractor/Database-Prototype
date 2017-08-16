@@ -8,17 +8,17 @@ namespace Client
 {
     class Program
     {
+        // 初始化函数
         static void Initialize()
         {
             DBClient.Initialize();
         }
 
+        // 主函数
         static void Main(string[] args)
         {
             Initialize();
             DBClient.Connect();
-
-
         }
     }
 }
