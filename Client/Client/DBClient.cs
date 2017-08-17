@@ -125,5 +125,10 @@ namespace Client
                 return (DataObject)result.data;
             }
         }
+
+        static public void Disconnect()
+        {
+            m_socket.Close();
+        }
     }
 }

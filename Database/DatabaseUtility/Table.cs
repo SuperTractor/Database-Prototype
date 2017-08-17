@@ -7,7 +7,7 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
 using System.IO;
-
+using System.Threading;
 
 namespace DatabaseUtility
 {
@@ -31,6 +31,10 @@ namespace DatabaseUtility
 
         // 存储数据项名和类型
         List<NamedVariable> m_variables;
+
+        // 读写锁，用来处理多个进程同时读写的冲突
+        ReaderWriterLockSlim m_lock = new ReaderWriterLockSlim();
+
 
         // 数据库初始化
         public Table(string tableName)
@@ -108,48 +112,67 @@ namespace DatabaseUtility
             m_doc.Save(m_path);
         }
 
+        // 增；这是写操作
         public void Insert(DataObject dataObj)
         {
-            // 重新加载表单
-            m_doc = XDocument.Load(m_path);
-
-            // 创建数据项
-            XElement entry = new XElement("entry");
-
-            for (int i = 0; i < dataObj.variables.Count; i++)
+            m_lock.EnterWriteLock();
+            try
             {
-                // 向数据项添加元素
-                // 如果这项数据是最后更新时间
-                if (dataObj.variables[i].name == "lastUpdatedTime")
+                // 重新加载表单
+                m_doc = XDocument.Load(m_path);
+
+                // 创建数据项
+                XElement entry = new XElement("entry");
+
+                for (int i = 0; i < dataObj.variables.Count; i++)
                 {
-                    // 盖上时间戳
-                    dataObj.variables[i].data = DateTime.Now;
+                    // 向数据项添加元素
+                    // 如果这项数据是最后更新时间
+                    if (dataObj.variables[i].name == "lastUpdatedTime")
+                    {
+                        // 盖上时间戳
+                        dataObj.variables[i].data = DateTime.Now;
+                    }
+
+                    XElement element = new XElement(dataObj.variables[i].name, dataObj.variables[i].data);
+                    entry.Add(element);
                 }
+                // 将数据项添加到根目录
+                m_doc.Root.Element("entries").Add(entry);
 
-                XElement element = new XElement(dataObj.variables[i].name, dataObj.variables[i].data);
-                entry.Add(element);
+                // 保存表单
+                m_doc.Save(m_path);
             }
-            // 将数据项添加到根目录
-            m_doc.Root.Element("entries").Add(entry);
+            finally
+            {
+                m_lock.ExitWriteLock();
+            }
 
-            // 保存表单
-            m_doc.Save(m_path);
         }
 
-        // 从该表单中，检查是否存在指定用户
+        // 从该表单中，检查是否存在指定用户；这是读
         public bool IsExist(string username)
         {
-            // 重新加载表单
-            m_doc = XDocument.Load(m_path);
-            // 获取所有 entry
-            List<XElement> entries = new List<XElement>(m_doc.Root.Element("entries").Elements());
-            // 找同名的记录
-            int idx = entries.FindIndex(entry => entry.Element("username").Value == username);
+            m_lock.EnterReadLock();
+            try
+            {
+                // 重新加载表单
+                m_doc = XDocument.Load(m_path);
+                // 获取所有 entry
+                List<XElement> entries = new List<XElement>(m_doc.Root.Element("entries").Elements());
+                // 找同名的记录
+                int idx = entries.FindIndex(entry => entry.Element("username").Value == username);
 
-            // 保存表单
-            m_doc.Save(m_path);
+                // 保存表单
+                m_doc.Save(m_path);
+
+                return idx >= 0;
+            }
+            finally
+            {
+                m_lock.ExitReadLock();
+            }
             // 返回查找结果
-            return idx >= 0;
         }
 
         // obsolete
@@ -183,72 +206,81 @@ namespace DatabaseUtility
             return true;
         }
 
+        // 查；这是读
         public DataObject Find(string username)
         {
-            // 重新加载表单
-            m_doc = XDocument.Load(m_path);
-            // 获取所有 entry
-            List<XElement> entries = new List<XElement>(m_doc.Root.Element("entries").Elements());
-            // 找同名的记录
-            int idx = entries.FindIndex(entry => entry.Element("username").Value == username);
-
-            if (idx < 0)
+            m_lock.EnterReadLock();
+            try
             {
-                // 用户名不存在
-                return null;
+                // 重新加载表单
+                m_doc = XDocument.Load(m_path);
+                // 获取所有 entry
+                List<XElement> entries = new List<XElement>(m_doc.Root.Element("entries").Elements());
+                // 找同名的记录
+                int idx = entries.FindIndex(entry => entry.Element("username").Value == username);
+
+                if (idx < 0)
+                {
+                    // 用户名不存在
+                    return null;
+                }
+
+                // 获取记录的所有数据项
+                List<XElement> elements = new List<XElement>(entries[idx].Elements());
+                // 复制数据项模板
+                NamedVariable[] temp = new NamedVariable[m_variables.Count];
+                m_variables.CopyTo(temp);
+
+                DataObject dataObj = new DataObject();
+                dataObj.variables = temp.ToList();
+
+                //names = new List<string>();
+                //values = new List<object>();
+                for (int i = 0; i < elements.Count; i++)
+                {
+                    string type = GetType(elements[i].Name.LocalName);
+                    if (type == "int")
+                    {
+                        dataObj.Set(elements[i].Name.LocalName, int.Parse(elements[i].Value));
+                    }
+                    else if (type == "bool")
+                    {
+                        dataObj.Set(elements[i].Name.LocalName, bool.Parse(elements[i].Value));
+                    }
+                    else if (type == "double")
+                    {
+                        dataObj.Set(elements[i].Name.LocalName, bool.Parse(elements[i].Value));
+                    }
+                    else if (type == "float")
+                    {
+                        dataObj.Set(elements[i].Name.LocalName, float.Parse(elements[i].Value));
+                    }
+                    else if (type == "double")
+                    {
+                        dataObj.Set(elements[i].Name.LocalName, double.Parse(elements[i].Value));
+                    }
+                    else if (type == "DateTime")
+                    {
+                        dataObj.Set(elements[i].Name.LocalName, DateTime.Parse(elements[i].Value));
+                    }
+                    else if (type == "string")
+                    {
+                        dataObj.Set(elements[i].Name.LocalName, elements[i].Value);
+                    }
+                }
+
+
+                // 保存表单
+                m_doc.Save(m_path);
+                return dataObj;
             }
-
-            // 获取记录的所有数据项
-            List<XElement> elements = new List<XElement>(entries[idx].Elements());
-            // 复制数据项模板
-            NamedVariable[] temp = new NamedVariable[m_variables.Count];
-            m_variables.CopyTo(temp);
-
-            DataObject dataObj = new DataObject();
-            dataObj.variables = temp.ToList();
-
-            //names = new List<string>();
-            //values = new List<object>();
-            for (int i = 0; i < elements.Count; i++)
+            finally
             {
-                string type = GetType(elements[i].Name.LocalName);
-                if (type == "int")
-                {
-                    dataObj.Set(elements[i].Name.LocalName, int.Parse(elements[i].Value));
-                }
-                else if (type == "bool")
-                {
-                    dataObj.Set(elements[i].Name.LocalName, bool.Parse(elements[i].Value));
-                }
-                else if (type == "double")
-                {
-                    dataObj.Set(elements[i].Name.LocalName, bool.Parse(elements[i].Value));
-                }
-                else if (type == "float")
-                {
-                    dataObj.Set(elements[i].Name.LocalName, float.Parse(elements[i].Value));
-                }
-                else if (type == "double")
-                {
-                    dataObj.Set(elements[i].Name.LocalName, double.Parse(elements[i].Value));
-                }
-                else if (type == "DateTime")
-                {
-                    dataObj.Set(elements[i].Name.LocalName, DateTime.Parse(elements[i].Value));
-                }
-                else if (type == "string")
-                {
-                    dataObj.Set(elements[i].Name.LocalName, elements[i].Value);
-                }
+                m_lock.ExitReadLock();
             }
-
-
-            // 保存表单
-            m_doc.Save(m_path);
-            return dataObj;
         }
 
-        // 更新数据项
+        // 更新数据项；这是写
         public void Update(DataObject dataObj)
         {
             // 如果不存在
@@ -260,37 +292,45 @@ namespace DatabaseUtility
             // 如果已经存在该用户的记录
             else
             {
-                // 重新加载表单
-                m_doc = XDocument.Load(m_path);
-                // 获取所有 entry
-                List<XElement> entries = new List<XElement>(m_doc.Root.Element("entries").Elements());
-                // 找同名的记录
-                int idx = entries.FindIndex(entry => entry.Element("username").Value == dataObj.username);
-
-                // 改数据
-                for (int i = 0; i < dataObj.variables.Count; i++)
+                m_lock.EnterWriteLock();
+                try
                 {
-                    // 如果这项数据是最后更新时间
-                    if (dataObj.variables[i].name == "lastUpdatedTime")
-                    {
-                        // 盖上时间戳
-                        dataObj.variables[i].data = DateTime.Now;
-                    }
-                    XElement element = entries[idx].Element(dataObj.variables[i].name);
-                    // 如果有这个数据项
-                    if (element != null)
-                    {
-                        element.SetValue(dataObj.variables[i].data);
-                    }
-                    // 如果没有
-                    else
-                    {
-                        entries[idx].Add(new XElement(dataObj.variables[i].name, dataObj.variables[i].data));
-                    }
-                }
+                    // 重新加载表单
+                    m_doc = XDocument.Load(m_path);
+                    // 获取所有 entry
+                    List<XElement> entries = new List<XElement>(m_doc.Root.Element("entries").Elements());
+                    // 找同名的记录
+                    int idx = entries.FindIndex(entry => entry.Element("username").Value == dataObj.username);
 
-                // 保存表单
-                m_doc.Save(m_path);
+                    // 改数据
+                    for (int i = 0; i < dataObj.variables.Count; i++)
+                    {
+                        // 如果这项数据是最后更新时间
+                        if (dataObj.variables[i].name == "lastUpdatedTime")
+                        {
+                            // 盖上时间戳
+                            dataObj.variables[i].data = DateTime.Now;
+                        }
+                        XElement element = entries[idx].Element(dataObj.variables[i].name);
+                        // 如果有这个数据项
+                        if (element != null)
+                        {
+                            element.SetValue(dataObj.variables[i].data);
+                        }
+                        // 如果没有
+                        else
+                        {
+                            entries[idx].Add(new XElement(dataObj.variables[i].name, dataObj.variables[i].data));
+                        }
+                    }
+
+                    // 保存表单
+                    m_doc.Save(m_path);
+                }
+                finally
+                {
+                    m_lock.ExitWriteLock();
+                }
             }
         }
     }

@@ -98,7 +98,7 @@ namespace Client
 
             } while (command != "quit");
 
-
+            DBClient.Disconnect();
         }
     }
 }

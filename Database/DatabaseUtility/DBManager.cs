@@ -47,7 +47,7 @@ namespace DatabaseUtility
 
         // 向指定表单插入一条记录
         // OBSOLETE
-        static public bool Insert(string tableName,object data)
+        static public bool Insert(string tableName, object data)
         {
             //if (itemNames.Count != itemValues.Count)
             //{
@@ -67,7 +67,7 @@ namespace DatabaseUtility
             if (tableName == "stat")
             {
             }
-            else if(tableName == "user")
+            else if (tableName == "user")
             {
 
             }
@@ -83,7 +83,7 @@ namespace DatabaseUtility
             return true;
         }
 
-        static public bool Insert(string tableName,DataObject dataObj)
+        static public bool Insert(string tableName, DataObject dataObj)
         {
             int idx = m_tables.FindIndex(table => table.name == tableName);
             if (idx < 0)
@@ -104,7 +104,7 @@ namespace DatabaseUtility
             return true;
         }
 
-        static public bool Update(string tableName,DataObject dataObj)
+        static public bool Update(string tableName, DataObject dataObj)
         {
             int idx = m_tables.FindIndex(table => table.name == tableName);
             if (idx < 0)
@@ -119,7 +119,7 @@ namespace DatabaseUtility
         }
 
         // 检查指定用户是否存在于指定表单
-        static public bool IsExist(string tableName,string userName)
+        static public bool IsExist(string tableName, string userName)
         {
             int idx = m_tables.FindIndex(table => table.name == tableName);
             if (idx < 0)
@@ -200,7 +200,7 @@ namespace DatabaseUtility
         //    return null;
         //}
 
-        static public DataObject Find(string tableName,string userName)
+        static public DataObject Find(string tableName, string userName)
         {
             int idx = m_tables.FindIndex(table => table.name == tableName);
             if (idx < 0)
