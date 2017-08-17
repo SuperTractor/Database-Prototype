@@ -83,6 +83,8 @@ namespace Database
                 // 指示已经有客户端连接，准备开始接待事宜
                 m_waitingCustomerEvent.Reset();
 
+                MyConsole.Log(string.Format("客户端{0}连接到服务器", socket.RemoteEndPoint));
+
                 // 创建数据服务
                 m_dataServices.Add(new DataService(socket));
                 // 创建数据服务线程

@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Database
+namespace DatabaseUtility
 {
+    [Serializable]
     public class NamedVariable
     {
         public string name { get; set; }

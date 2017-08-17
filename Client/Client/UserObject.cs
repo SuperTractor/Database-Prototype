@@ -3,20 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DatabaseUtility;
 
-namespace Database
+namespace Client
 {
     /// <summary>
     /// 对应 user 表单一个记录
     /// </summary>
     /// 
-    [Serializable]
+    //[Serializable]
     public class UserObject : DataObject
     {
         public string password
         {
             get
             {
+
                 return (string)Get("password");
             }
             set

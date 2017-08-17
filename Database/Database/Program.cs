@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DBNetworking;
 using System.Threading;
+using DatabaseUtility;
 
 namespace Database
 {
@@ -28,6 +29,10 @@ namespace Database
         {
             // 这是主线程
             Thread.CurrentThread.Name = "主线程";
+
+            // 初始化数据库管理员
+            DBManager.Initialize();
+
             // 初始化数据库服务器
             DBServer.Initialize();
         }

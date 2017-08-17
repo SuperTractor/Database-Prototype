@@ -24,6 +24,7 @@ namespace DBNetworking
         {
             Insert,     // 增
             Find,       // 查
+            IsExist,    // 是否存在
             //Delete,   // 删
             Update      // 改
         }
@@ -33,11 +34,19 @@ namespace DBNetworking
             get { return m_operation; }
         }
 
+        object m_data;
+        public object data
+        {
+            get { return m_data; }
+        }
+
+
         // 构造函数
-        public Command(string tableName,Operation operation)
+        public Command(string tableName, Operation operation, object data)
         {
             m_tableName = tableName;
             m_operation = operation;
+            m_data = data;
         }
     }
 }

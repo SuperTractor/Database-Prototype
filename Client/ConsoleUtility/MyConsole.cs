@@ -20,7 +20,7 @@ namespace ConsoleUtility
         /// <param name="message"></param>
         /// <param name="LoggerName"></param>
         /// <param name="logType"></param>
-        public static void Log(string message,/*string LoggerName,*/ LogType logType)
+        public static void Log(string message,/*string LoggerName,*/ LogType logType=LogType.Debug)
         {
             string log = "";
             log += DateTime.Now.ToString() + " : ";

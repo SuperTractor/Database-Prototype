@@ -9,7 +9,7 @@ using System.Xml.XPath;
 using System.IO;
 
 
-namespace Database
+namespace DatabaseUtility
 {
     /// <summary>
     /// 管理一个表单的类

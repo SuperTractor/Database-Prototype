@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Database
+namespace DatabaseUtility
 {
     /// <summary>
     /// 为了避免表单一直放在内存，所有操作前，都应该重新加载表单，完成操作后，保存表单
@@ -13,10 +13,20 @@ namespace Database
     public class DBManager
     {
         // 存放要用到的表
-        List<Table> m_tables; 
+        static List<Table> m_tables;
 
         // 初始化函数
         public DBManager()
+        {
+            // 新建表单
+            m_tables = new List<Table>();
+            // 用户基本信息表单
+            m_tables.Add(new Table("user"));
+            // 用户游戏统计数据表单
+            m_tables.Add(new Table("stat"));
+        }
+
+        static public void Initialize()
         {
             // 新建表单
             m_tables = new List<Table>();
@@ -37,7 +47,7 @@ namespace Database
 
         // 向指定表单插入一条记录
         // OBSOLETE
-        public bool Insert(string tableName,object data)
+        static public bool Insert(string tableName,object data)
         {
             //if (itemNames.Count != itemValues.Count)
             //{
@@ -73,7 +83,7 @@ namespace Database
             return true;
         }
 
-        public bool Insert(string tableName,DataObject dataObj)
+        static public bool Insert(string tableName,DataObject dataObj)
         {
             int idx = m_tables.FindIndex(table => table.name == tableName);
             if (idx < 0)
@@ -89,12 +99,12 @@ namespace Database
 
         // 更新现有数据，如果没有，则自动创建
         // OBSOLETE
-        public bool Update(string tableName, object data)
+        static public bool Update(string tableName, object data)
         {
             return true;
         }
 
-        public bool Update(string tableName,DataObject dataObj)
+        static public bool Update(string tableName,DataObject dataObj)
         {
             int idx = m_tables.FindIndex(table => table.name == tableName);
             if (idx < 0)
@@ -109,7 +119,7 @@ namespace Database
         }
 
         // 检查指定用户是否存在于指定表单
-        public bool IsExist(string tableName,string userName)
+        static public bool IsExist(string tableName,string userName)
         {
             int idx = m_tables.FindIndex(table => table.name == tableName);
             if (idx < 0)
@@ -190,7 +200,7 @@ namespace Database
         //    return null;
         //}
 
-        public DataObject Find(string tableName,string userName)
+        static public DataObject Find(string tableName,string userName)
         {
             int idx = m_tables.FindIndex(table => table.name == tableName);
             if (idx < 0)
