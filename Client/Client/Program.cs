@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DatabaseUtility;
 using ConsoleUtility;
+using DBNetworking;
 
 namespace Client
 {
@@ -13,14 +14,16 @@ namespace Client
         // 初始化函数
         static void Initialize()
         {
+            DBClient.RegisterLogger(MyConsole.Log);
             DBClient.Initialize();
+            DBClient.Connect();
         }
 
         // 主函数
         static void Main(string[] args)
         {
             Initialize();
-            DBClient.Connect();
+
             string command;
             do
             {

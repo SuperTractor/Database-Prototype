@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using ConsoleUtility;
+//using ConsoleUtility;
 using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization;
@@ -11,10 +10,9 @@ using System.Net;
 using System.Threading;
 using System.Diagnostics;
 using System.IO;
-using DBNetworking;
 using DatabaseUtility;
 
-namespace Client
+namespace DBNetworking
 {
     /// <summary>
     /// 数据库客户端
@@ -27,6 +25,11 @@ namespace Client
         static IPAddress m_ip;
         // 数据服务的端口
         static int m_port = 8884;
+
+        // 控制台输出函数指针
+        public delegate void LogHandler(string message);
+
+        static LogHandler m_logHandler = null;
 
         // 获取本机地址
         static IPAddress GetLocalAddress()
@@ -52,12 +55,26 @@ namespace Client
 
             // 新建 socket
             m_socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        }
 
+        // 注册调试信息输出接口
+        public static void RegisterLogger(LogHandler logHandler)
+        {
+            m_logHandler = logHandler;
+        }
+
+        // 调试输出信息封装
+        static void Log(string message)
+        {
+            // 当有注册调试信息输出接口时，才会输出调试信息
+            m_logHandler?.Invoke(message);
         }
 
         public static bool Connect()
         {
-            MyConsole.Log("准备连接服务器", MyConsole.LogType.Debug);
+            //MyConsole.Log("准备连接服务器", MyConsole.LogType.Debug);
+            Log(string.Format("准备连接数据库服务器{0}:{1}", m_ip, m_port));
+
             // 连接服务器
             m_socket.Connect(new IPEndPoint(m_ip, m_port));
             // 检查是否连接上服务器
@@ -67,7 +84,10 @@ namespace Client
             }
             else
             {
-                MyConsole.Log("成功连接服务器", MyConsole.LogType.Debug);
+                //MyConsole.Log("成功连接服务器", MyConsole.LogType.Debug);
+                Log(string.Format("成功连接数据库服务器{0}:{1}", m_ip, m_port));
+
+                //Log("成功连接服务器");
             }
             return m_socket.Connected;
         }
@@ -86,8 +106,8 @@ namespace Client
         static public bool Insert(string tableName, DataObject dataObj)
         {
             // 新建命令
-            Command command = new Command(tableName, Command.Operation.Insert, new DataObject( dataObj));
-            Result result =(Result)Request(command);
+            Command command = new Command(tableName, Command.Operation.Insert, new DataObject(dataObj));
+            Result result = (Result)Request(command);
             return (bool)result.data;
         }
 
@@ -116,7 +136,7 @@ namespace Client
             Command command = new Command(tableName, Command.Operation.Find, userName);
             Result result = (Result)Request(command);
 
-            if(result.code== Result.Code.Fail)
+            if (result.code == Result.Code.Fail)
             {
                 return null;
             }

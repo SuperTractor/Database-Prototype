@@ -20,7 +20,7 @@ namespace ConsoleUtility
         /// <param name="message"></param>
         /// <param name="LoggerName"></param>
         /// <param name="logType"></param>
-        public static void Log(string message,/*string LoggerName,*/ LogType logType=LogType.Debug)
+        public static void Log(string message,/*string LoggerName,*/ LogType logType)
         {
             string log = "";
             log += DateTime.Now.ToString() + " : ";
@@ -38,6 +38,12 @@ namespace ConsoleUtility
             }
             log += message;
             Console.WriteLine(log);
+        }
+
+        // 默认是 DEBUG 模式输出
+        public static void Log(string message)
+        {
+            Log(message, LogType.Debug);
         }
 
     }

@@ -71,12 +71,15 @@ namespace Database
                 }
             }
             // 可能是断线了
-            catch
+            catch(Exception e)
             {
+                MyConsole.Log(string.Format("客户端{0}抛出异常：{1}", m_socket.RemoteEndPoint,e.Message));
+
                 MyConsole.Log(string.Format("断开客户端{0}的连接", m_socket.RemoteEndPoint), MyConsole.LogType.Debug);
                 // 断开连接
                 m_socket.Close();
                 //throw;
+
             }
 
         }

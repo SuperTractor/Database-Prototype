@@ -18,7 +18,6 @@ namespace Client
         {
             get
             {
-
                 return (string)Get("password");
             }
             set
@@ -34,7 +33,9 @@ namespace Client
 
         public UserObject(DataObject dataObj)
         {
-            variables = dataObj.variables;
+            //variables = dataObj.variables;
+            variables = new List<NamedVariable>(dataObj.variables);
+
         }
     }
 }

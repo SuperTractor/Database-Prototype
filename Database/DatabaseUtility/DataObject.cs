@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace DatabaseUtility
 {
@@ -72,7 +71,11 @@ namespace DatabaseUtility
             variables = new List<NamedVariable>();
             variables.Add(new NamedVariable("username", "string"));
             variables.Add(new NamedVariable("lastUpdatedTime", "DateTime"));
+
+            // 盖个时间戳
+            lastUpdatedTime = DateTime.Now;
         }
+
 
         // 复制构造函数
         public DataObject(DataObject dataObj)

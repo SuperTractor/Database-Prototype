@@ -33,7 +33,9 @@ namespace Client
 
         public StatObject(DataObject dataObj)
         {
-            variables = dataObj.variables;
+            //variables = dataObj.variables;
+            variables = new List<NamedVariable>(dataObj.variables);
+
         }
     }
 }
