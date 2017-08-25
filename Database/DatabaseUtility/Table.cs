@@ -34,7 +34,6 @@ namespace DatabaseUtility
         // 读写锁，用来处理多个进程同时读写的冲突
         ReaderWriterLockSlim m_lock = new ReaderWriterLockSlim();
 
-
         // 数据库初始化
         public Table(string tableName)
         {
@@ -248,15 +247,11 @@ namespace DatabaseUtility
                     }
                     else if (type == "double")
                     {
-                        dataObj.Set(elements[i].Name.LocalName, bool.Parse(elements[i].Value));
+                        dataObj.Set(elements[i].Name.LocalName, double.Parse(elements[i].Value));
                     }
                     else if (type == "float")
                     {
                         dataObj.Set(elements[i].Name.LocalName, float.Parse(elements[i].Value));
-                    }
-                    else if (type == "double")
-                    {
-                        dataObj.Set(elements[i].Name.LocalName, double.Parse(elements[i].Value));
                     }
                     else if (type == "DateTime")
                     {
@@ -279,7 +274,10 @@ namespace DatabaseUtility
             }
         }
 
-        // 更新数据项；这是写
+        
+
+
+        // 更新整条记录；这是写
         public void Update(DataObject dataObj)
         {
             // 如果不存在
@@ -331,6 +329,63 @@ namespace DatabaseUtility
                     m_lock.ExitWriteLock();
                 }
             }
+        }
+
+
+        // 更新指定记录的某项数据；这是写
+        public void Update(string username, string itemName, object value)
+        {
+            // 如果不存在
+            if (!IsExist(username))
+            {
+                //throw new Exception(string.Format("找不到用户{0}", username));
+                // 增加这个用户名，并将他的指定数据项初始化
+                DataObject dataObj = new DataObject();
+                // 初始化记录
+                dataObj.variables = new List<NamedVariable>(m_variables);
+                // 初始化指定项
+                dataObj.Set(itemName, value);
+                // 更新该用户
+                Update(dataObj);
+
+            }
+            else
+            {
+                m_lock.EnterWriteLock();
+                try
+                {
+                    // 重新加载表单
+                    m_doc = XDocument.Load(m_path);
+                    // 获取所有 entry
+                    List<XElement> entries = new List<XElement>(m_doc.Root.Element("entries").Elements());
+                    // 找同名的记录
+                    int idx = entries.FindIndex(entry => entry.Element("username").Value == username);
+                    // 改数据
+                    XElement element = entries[idx].Element(itemName);
+                    // 如果有这个数据项
+                    if (element != null)
+                    {
+                        element.SetValue(value);
+                    }
+                    // 如果没有
+                    else
+                    {
+                        // 新增这个数据项
+                        entries[idx].Add(new XElement(itemName, value));
+                    }
+                    // 盖上时间戳
+                    XElement lastUpdatedTimeElement = entries[idx].Element("lastUpdatedTime");
+                    lastUpdatedTimeElement.SetValue(DateTime.Now);
+
+                    // 保存表单
+                    m_doc.Save(m_path);
+                }
+                finally
+                {
+                    m_lock.ExitWriteLock();
+                }
+            }
+
         }
     }
 }

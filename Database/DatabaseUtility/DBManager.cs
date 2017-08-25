@@ -33,6 +33,8 @@ namespace DatabaseUtility
             m_tables.Add(new Table("user"));
             // 用户游戏统计数据表单
             m_tables.Add(new Table("stat"));
+            // 等级-头衔表单
+            m_tables.Add(new Table("level_title"));
         }
 
         //// 清理函数
@@ -113,6 +115,21 @@ namespace DatabaseUtility
             }
 
             m_tables[idx].Update(dataObj);
+
+            return true;
+        }
+
+        // 更新指定记录的某项数据；这是写
+        static public bool Update(string tableName, string username, string itemName, object value)
+        {
+            int idx = m_tables.FindIndex(table => table.name == tableName);
+            if (idx < 0)
+            {
+                // 找不到指定表单
+                return false;
+            }
+
+            m_tables[idx].Update(username, itemName, value);
 
             return true;
         }

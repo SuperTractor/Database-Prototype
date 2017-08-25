@@ -120,6 +120,16 @@ namespace DBNetworking
             return (bool)result.data;
         }
 
+        // 改
+        static public bool Update(string tableName, string username, string itemName, object value)
+        {
+            // 新建命令
+            Command command = new Command(tableName, username, itemName, value);
+            Result result = (Result)Request(command);
+            return (bool)result.data;
+        }
+
+
         // 查
         static public bool IsExist(string tableName, string userName)
         {
@@ -149,6 +159,33 @@ namespace DBNetworking
         static public void Disconnect()
         {
             m_socket.Close();
+        }
+
+        // 询问数据库，以检查连接状况
+        static public bool CheckConnection()
+        {
+            // 新建命令
+            Command command = new Command();
+            try
+            {
+                Result result = (Result)Request(command);
+                return true;
+            }
+            catch
+            {
+                // 有可能是断线了
+                return false;
+            }
+        }
+
+        static public void SummitUsername(string username)
+        {
+            if (username != null && username != "")
+            {
+                // 新建命令
+                Command command = new Command(username);
+                Result result = (Result)Request(command);
+            }
         }
     }
 }

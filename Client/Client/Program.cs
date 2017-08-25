@@ -66,6 +66,14 @@ namespace Client
                             userObj.password = tokens[3];
                             DBClient.Insert(tokens[1], userObj);
                         }
+                        else if (tokens[1] == "level_title")
+                        {
+                            LevelTitleObject levelTitleObject = new LevelTitleObject();
+                            levelTitleObject.username = tokens[2];
+                            levelTitleObject.level = int.Parse(tokens[3]);
+                            levelTitleObject.title = tokens[4];
+                            DBClient.Insert(tokens[1], levelTitleObject);
+                        }
                         break;
                     case "isexist":
                         bool isExist = DBClient.IsExist(tokens[1], tokens[2]);
