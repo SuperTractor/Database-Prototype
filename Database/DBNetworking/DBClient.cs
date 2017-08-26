@@ -1,4 +1,7 @@
-﻿using System;
+﻿//#define ALI
+#undef ALI
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,7 +24,13 @@ namespace DBNetworking
     {
         static Socket m_socket;
         // 服务器 IP 地址
+#if (ALI)
+        static string m_serverIP = "39.108.178.24";
+        //static string m_serverIP = "0.0.0.0";
+#else
         static string m_serverIP = "192.168.56.1";
+
+#endif
         static IPAddress m_ip;
         // 数据服务的端口
         static int m_port = 8884;
@@ -35,23 +44,37 @@ namespace DBNetworking
         static IPAddress GetLocalAddress()
         {
             var host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (var ip in host.AddressList)
+
+            for (int i = host.AddressList.Length - 1; i >= 0; i--)
             {
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                if (host.AddressList[i].AddressFamily == AddressFamily.InterNetwork)
                 {
-                    return ip;
+                    return host.AddressList[i];
                 }
             }
+
+            //foreach (var ip in host.AddressList)
+            //{
+            //    if (ip.AddressFamily == AddressFamily.InterNetwork)
+            //    {
+            //        return ip;
+            //    }
+            //}
             throw new Exception("没有找到 IP 地址");
+
         }
 
         public static void Initialize()
         {
             // 获取服务器 IP
             //m_ip = IPAddress.Parse(m_serverIP);
-
-            // 测试：自动获取本地 IP
+#if (ALI)
+            m_ip = IPAddress.Parse(m_serverIP);
+#else
+             // 测试：自动获取本地 IP
             m_ip = GetLocalAddress();
+#endif
+
 
             // 新建 socket
             m_socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);

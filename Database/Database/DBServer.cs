@@ -1,4 +1,7 @@
-﻿using System;
+﻿//#define ALI
+#undef ALI
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -26,6 +29,13 @@ namespace Database
         // 服务器容量
         static int m_capacity;
 
+#if (ALI)
+        static string m_serverIP = "39.108.178.24";
+        //static string m_serverIP = "0.0.0.0";
+#else
+        static string m_serverIP = "192.168.56.1";
+#endif
+
         // 指示正在等待客户端连接服务器的事件
         private static ManualResetEvent m_waitingCustomerEvent = new ManualResetEvent(false);
         public static ManualResetEvent waitingCustomerEvent
@@ -40,21 +50,36 @@ namespace Database
         static IPAddress GetLocalAddress()
         {
             var host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (var ip in host.AddressList)
+
+            for (int i = host.AddressList.Length - 1; i >= 0; i--)
             {
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                if (host.AddressList[i].AddressFamily == AddressFamily.InterNetwork)
                 {
-                    return ip;
+                    return host.AddressList[i];
                 }
             }
+
+            //foreach (var ip in host.AddressList)
+            //{
+            //    if (ip.AddressFamily == AddressFamily.InterNetwork)
+            //    {
+            //        return ip;
+            //    }
+            //}
             throw new Exception("没有找到 IP 地址");
+
         }
 
         // 初始化函数
         public static void Initialize()
         {
-            // 获取本机地址
+#if (ALI)
+            m_ip = IPAddress.Parse(m_serverIP); 
+#else
+                    // 获取本机地址
             m_ip = GetLocalAddress();
+#endif
+
             // 侦听连接
             m_socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             m_socket.Bind(new IPEndPoint(m_ip, m_port));
@@ -90,7 +115,7 @@ namespace Database
                 // 创建数据服务线程
                 Thread serviceThread = new Thread(new ThreadStart(m_dataServices.Last().Serve));
                 // 给数据服务线程命名
-                serviceThread.Name = string.Format("数据服务{0}",id++);
+                serviceThread.Name = string.Format("数据服务{0}", id++);
                 // 启动数据服务
                 serviceThread.Start();
                 // 等待数据服务启动
