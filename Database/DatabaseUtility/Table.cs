@@ -162,7 +162,7 @@ namespace DatabaseUtility
                 int idx = entries.FindIndex(entry => entry.Element("username").Value == username);
 
                 // 保存表单
-                m_doc.Save(m_path);
+                //m_doc.Save(m_path);
 
                 return idx >= 0;
             }
@@ -265,7 +265,7 @@ namespace DatabaseUtility
 
 
                 // 保存表单
-                m_doc.Save(m_path);
+                //m_doc.Save(m_path);
                 return dataObj;
             }
             finally
@@ -273,8 +273,6 @@ namespace DatabaseUtility
                 m_lock.ExitReadLock();
             }
         }
-
-        
 
 
         // 更新整条记录；这是写

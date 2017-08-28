@@ -25,7 +25,12 @@ namespace Database
         // 用来断线后，标记离线的；所有客户端连线之后，登录用户之后，一定要发送用户名
         string m_username = null;
 
-
+        // 指示是否已经完成了数据服务
+        bool m_doneService = false;
+        public bool doneService
+        {
+            get { return m_doneService; }
+        }
 
         // 构造函数
         public DataService(Socket socket)
@@ -58,7 +63,7 @@ namespace Database
                             {
                                 Serializer.Send(m_socket, new Result(dataObj, Result.Code.Fail));
                             }
-                            MyConsole.Log(string.Format("客户端{0}查找 - 表单{1}；用户名{2}", m_socket.RemoteEndPoint, command.tableName, (string)command.data));
+                            //MyConsole.Log(string.Format("客户端{0}查找 - 表单{1}；用户名{2}", m_socket.RemoteEndPoint, command.tableName, (string)command.data));
                             break;
                         case Command.Operation.Insert:
                             result = new Result(DBManager.Insert(command.tableName, (DataObject)command.data));
@@ -68,7 +73,7 @@ namespace Database
                         case Command.Operation.IsExist:
                             result = new Result(DBManager.IsExist(command.tableName, (string)command.data));
                             Serializer.Send(m_socket, result);
-                            MyConsole.Log(string.Format("客户端{0}查存 - 表单{1}；用户名{2}", m_socket.RemoteEndPoint, command.tableName, (string)command.data));
+                            //MyConsole.Log(string.Format("客户端{0}查存 - 表单{1}；用户名{2}", m_socket.RemoteEndPoint, command.tableName, (string)command.data));
                             break;
                         case Command.Operation.Update:
                             result = new Result(DBManager.Update(command.tableName, (DataObject)command.data));
@@ -92,7 +97,6 @@ namespace Database
                         default:
                             break;
                     }
-
                 }
             }
             // 可能是断线了
@@ -119,13 +123,12 @@ namespace Database
                     DBManager.Update("user", m_username, "isOnline", false);
                 }
 
-
                 // 断开连接
                 m_socket.Close();
                 //throw;
-
             }
-
+            // 标志已经完成服务
+            m_doneService = true;
         }
     }
 }
